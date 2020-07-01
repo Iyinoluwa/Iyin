@@ -1,0 +1,146 @@
+CREATE TABLE sales_data (
+    sales_date date,
+    sales_year varchar,
+    cus_id varchar,
+    cus_age int,
+    cus_gender varchar,
+    cus_country text,
+    cus_state text,
+    prod_category varchar,
+    prod_subcategory varchar,
+    product varchar,
+    ord_quantity int,
+    unit_cost int,
+    unit_price int,
+    cost int,
+    revenue int
+    );
+	
+/* This code is used to import the csv file from my drive */
+COPY sales_data 
+FROM 'D:\Buybuy Sales Data.csv'
+DELIMITER ',' CSV 
+HEADER;
+
+/* This code is used to check the attributes(column names) of my data*/ 
+SELECT *
+FROM sales_data
+
+
+/*Question 1a...This code is used for solving query that returns the total profit made by BuyBuy from 1Q11 to 4Q16 (all quarters of every year)*/
+SELECT sum (revenue - cost) AS Total_profit, sales_year, date_part ('quarter', sales_date) AS quarter
+FROM sales_data
+WHERE sales_date BETWEEN '2011-01-01' AND '2016-12-31'
+GROUP BY date_part ('quarter', sales_date), sales_year
+ORDER BY date_part ('quarter', sales_date), sales_year
+;
+
+
+/*Question 1b... This code write queries that return the total profit made by BuyBuy in Q2 of every year from 2011 to 2016.*/
+SELECT sum (revenue - cost) AS Total_Profit, date_part ('quarter', sales_date) AS quarter, sales_year
+FROM sales_data 
+WHERE date_part ('quarter', sales_date) = 2 AND sales_date BETWEEN '2011-01-01' AND '2016-12-31'
+GROUP BY date_part ('quarter', sales_date), sales_year
+;
+
+
+/*Question 1c..... This code  returns the annual profit made by BuyBuy from the year 2011 to 2016.*/
+SELECT sales_year, sum (revenue - cost) AS Annual_Profit
+FROM sales_data 
+WHERE sales_date BETWEEN '2011-01-01' AND '2016-12-31'
+GROUP BY sales_year
+ORDER BY sales_year
+;
+
+				OR
+				
+SELECT sales_year, sum (revenue - cost) AS Annual_Profit
+FROM sales_data
+WHERE sales_date BETWEEN '2011-01-01' AND '2016-12-31'
+GROUP BY date_part ('year', sales_date), sales_year
+ORDER BY date_part ('year', sales_date), sales_year
+;
+
+
+/*Question 2a.... These queries return the countries where BuyBuy has made the most profit and also the least profit of all-time. Your query must display both results on the
+same output.*/
+SELECT cus_country AS Customer_Country, SUM (revenue - cost) AS Max_profit
+FROM sales_data
+GROUP BY cus_country
+ORDER BY Max_profit desc
+Limit 1
+;
+SELECT cus_country AS Country, SUM (revenue - cost) AS Min_profit 
+FROM sales_data
+GROUP BY cus_country
+ORDER BY  Min_profit
+Limit 1
+;
+
+/*Question 2b...  This query shows the Top-10 most profitable countries for BuyBuy sales operations from year 2011 to 2016*/
+SELECT cus_country AS Customer_country, SUM (revenue - cost) AS Annual_Profit 
+FROM sales_data 
+GROUP BY cus_country
+ORDER BY annual_profit desc
+;
+
+/* Question 2c..... This query shows the all-time Top-10 least profitable countries for BuyBuy sales operations.*/
+SELECT cus_country, SUM (revenue - cost) AS Annual_Profit
+FROM sales_data 
+GROUP BY cus_country
+ORDER BY annual_profit
+;
+
+/*Question 3a. Write a query that ranks all product categories sold by Buybuy, from least amount to the most amount of all-time revenue generated.*/
+SELECT prod_category, SUM (revenue) AS Product_ranking
+FROM sales_data
+GROUP BY prod_category
+ORDER BY 
+;
+
+
+/*Question 3b. The query that returns Top-2 product categories offered by Buybuy with an all-time high number of units sold.*/
+SELECT prod_category, SUM (ord_quantity) AS Quantity 
+FROM sales_data
+GROUP BY prod_category
+ORDER BY quantity desc
+LIMIT 2
+;
+
+/*Question 3c. This query shows the Top 10 highest-grossing products sold by BuyBuy based on all-time profits.*/
+SELECT product, SUM (revenue), SUM (revenue - cost) AS Profit 
+FROM sales_data
+GROUP BY product, revenue
+ORDER BY profit DESC
+LIMIT 10
+;
+
+/* EXPORT IN CSV FOR QUESTION 1D */
+Copy (SELECT sum (revenue - cost) AS Total_Profit, date_part ('quarter', sales_date) AS quarter, sales_year
+FROM sales_data 
+WHERE date_part ('quarter', sales_date) = 2 AND sales_date BETWEEN '2011-01-01' AND '2016-12-31'
+GROUP BY date_part ('quarter', sales_date), sales_year)
+To 'D:\EXCEL EXPORT\Question1D.csv'
+DELIMITER ',' CSV
+HEADER
+;
+
+/* EXPORT IN CSV FOR QUESTION 2D */
+Copy (SELECT cus_country AS Customer_country, SUM (revenue - cost) AS Annual_Profit 
+FROM sales_data 
+GROUP BY cus_country
+ORDER BY annual_profit desc)
+To 'D:\EXCEL EXPORT\Question2D.csv'
+DELIMITER ',' CSV
+HEADER;
+
+/* EXPORT IN CSV FOR QUESTION 3D */
+Copy (SELECT prod_category, SUM (ord_quantity) AS Quantity 
+FROM sales_data
+GROUP BY prod_category
+ORDER BY quantity desc
+LIMIT 2)
+To 'D:\EXCEL EXPORT\Question3D.csv'
+DELIMITER ',' CSV
+HEADER;
+
